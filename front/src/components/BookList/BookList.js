@@ -11,11 +11,10 @@ const BookList = () => {
   const filters = useSelector((state) => state.filter);
   const dispatch = useDispatch();
 
-  const [filteredBooks, setFilteredBooks] = useState([]);
+  // const [filteredBooks, setFilteredBooks] = useState([]);
 
-  useEffect(() => {
-    console.log("Filters: ", filters);
-    const filtered = books.filter((b) => {
+  const filteredBooks = () => {
+    return books.filter((b) => {
       const matchedTitle = b.title
         .toLowerCase()
         .includes(filters.title.toLowerCase());
@@ -25,22 +24,31 @@ const BookList = () => {
       const matchedFavorite = filters.isFavorite ? b.isFavorite : true;
 
       return matchedTitle && matchedAuthor && matchedFavorite;
-
     });
-    setFilteredBooks(filtered);
-  }, [books, filters]);
+  };
+
+  const highlightText = (text, filter) => {
+    const regExp = new RegExp(`(${filter})`, 'gi');
+    console.log(regExp, text.split(regExp))
+    return text.split(regExp).map((substring, idx) => {
+      if(substring.toLowerCase() === filter.toLowerCase()) {
+        return <span key={idx} className="highlightText">{substring}</span>
+      };
+      return substring;
+    });
+  }
 
   return (
     <div className="app-block book-list">
       <h2>Book List</h2>
       <ul>
         {books.length ? (
-          filteredBooks.map((b, idx) => {
+          filteredBooks().map((b, idx) => {
             return (
               <li key={b.id}>
                 <div className="book-info">
-                  {++idx}.{b.title} by
-                  <strong> {b.author}</strong>
+                  {++idx}.{highlightText(b.title, filters.title)} by
+                  <strong> {highlightText(b.author, filters.author)}</strong>
                 </div>
                 <div className="book-actions">
                   <SwitchFavoriteButton
